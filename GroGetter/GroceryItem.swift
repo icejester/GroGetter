@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import SwiftUI
 
-struct GroceryCategory: Identifiable, Codable, Hashable, Equatable {
+struct GroceryCategory: Identifiable, Codable, Hashable, Equatable, CaseIterable {
     static let standardCategories: [GroceryCategory] = [
         GroceryCategory(name: "Produce"),
         GroceryCategory(name: "Bakery"),
@@ -41,6 +42,18 @@ struct GroceryCategory: Identifiable, Codable, Hashable, Equatable {
     
     let id: UUID
     let name: String
+    var color: Color {
+        switch name.lowercased() {
+        case "produce": return .green
+        case "bakery": return .orange
+        case "deli": return .red
+        case "butcher": return .pink
+        case "dairy": return .blue
+        case "aisles": return .purple
+        case "frozen": return .cyan
+        default: return .gray
+        }
+    }
     var isCustom: Bool {
         !GroceryCategory.standardCategories.contains(self)
     }
@@ -98,7 +111,7 @@ enum QuantityUnit: String, CaseIterable, Identifiable, Codable {
     var id: String { self.rawValue }
 }
 
-struct GroceryItem: Identifiable, Codable, Equatable {
+struct GroceryItem: Identifiable, Codable, Hashable, Equatable {
     var id = UUID()
     var name: String
     var category: GroceryCategory = GroceryCategory(name: "Produce")

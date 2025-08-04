@@ -145,6 +145,10 @@ struct ItemDetailView: View {
     
     private func saveItem() {
         guard let quantityValue = Double(quantity) else { return }
+        guard let listId = store.selectedListId else {
+            presentationMode.wrappedValue.dismiss()
+            return
+        }
         
         let newItem = GroceryItem(
             id: item?.id ?? UUID(),
@@ -156,19 +160,28 @@ struct ItemDetailView: View {
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines)
         )
         
-        if let index = store.items.firstIndex(where: { $0.id == item?.id }) {
-            store.items[index] = newItem
+        if let item = item {
+            // Update existing item
+            store.updateItem(newItem, in: listId)
         } else {
-            store.addItem(newItem)
+            // Add new item
+            store.addItem(newItem, to: listId)
         }
         
         presentationMode.wrappedValue.dismiss()
     }
     
     private func deleteItem() {
-        if let item = item, let index = store.items.firstIndex(where: { $0.id == item.id }) {
-            store.deleteItems(at: IndexSet(integer: index))
+        guard let item = item, let listId = store.selectedListId else {
+            presentationMode.wrappedValue.dismiss()
+            return
         }
+        
+        if let listIndex = store.lists.firstIndex(where: { $0.id == listId }),
+           let itemIndex = store.lists[listIndex].items.firstIndex(where: { $0.id == item.id }) {
+            store.deleteItems(at: IndexSet(integer: itemIndex), from: listId)
+        }
+        
         presentationMode.wrappedValue.dismiss()
     }
 }
