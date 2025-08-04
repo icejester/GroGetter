@@ -323,65 +323,88 @@ struct ItemRow: View {
     
     @State private var showingDetail = false
     
+    private func toggleCompletion() {
+        var updatedItem = item
+        updatedItem.isCompleted.toggle()
+        onUpdate(updatedItem)
+    }
+    
     var body: some View {
-        Button(action: { showingDetail = true }) {
-            HStack {
-                // Checkbox
-                Button(action: {
-                    var updatedItem = item
-                    updatedItem.isCompleted.toggle()
-                    onUpdate(updatedItem)
-                }) {
-                    Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(item.isCompleted ? .green : .gray)
-                        .font(.title2)
+        HStack {
+            // Checkbox with tap gesture
+            Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(item.isCompleted ? .green : .gray)
+                .font(.title2)
+                .onTapGesture {
+                    toggleCompletion()
                 }
-                .buttonStyle(BorderlessButtonStyle())
-                
-                // Item details
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.name)
-                        .strikethrough(item.isCompleted)
-                        .foregroundColor(item.isCompleted ? .gray : .primary)
-                    
-                    if !item.displayQuantity.isEmpty || !item.notes.isEmpty {
-                        HStack(spacing: 8) {
-                            if !item.displayQuantity.isEmpty {
-                                Text(item.displayQuantity)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            if !item.notes.isEmpty {
-                                Text("•")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+            
+            // Item details - make entire area tappable for detail view
+            Button(action: { showingDetail = true }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.name)
+                            .strikethrough(item.isCompleted)
+                            .foregroundColor(item.isCompleted ? .gray : .primary)
+                        
+                        if !item.displayQuantity.isEmpty || !item.notes.isEmpty {
+                            HStack(spacing: 8) {
+                                if !item.displayQuantity.isEmpty {
+                                    Text(item.displayQuantity)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                                 
-                                Text(item.notes)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
+                                if !item.notes.isEmpty {
+                                    Text("•")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text(item.notes)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                }
                             }
                         }
                     }
+                    
+                    Spacer()
+                    
+                    // Category indicator
+                    Text(String(item.category.name.prefix(1)))
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .frame(width: 20, height: 20)
+                        .background(Circle().fill(categoryColor(for: item.category)))
                 }
-                
-                Spacer()
-                
-                // Category indicator
-                Text(String(item.category.name.prefix(1)))
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(width: 20, height: 20)
-                    .background(Circle().fill(categoryColor(for: item.category)))
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
+            .buttonStyle(PlainButtonStyle())
         }
-        .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showingDetail) {
             ItemDetailView(item: item)
                 .environmentObject(store)
+        }
+        .swipeActions(edge: .leading) {
+            Button(role: .destructive, action: {
+                if let index = store.items.firstIndex(where: { $0.id == item.id }) {
+                    store.deleteItems(at: IndexSet(integer: index))
+                }
+            }) {
+                Label("Delete", systemImage: "trash")
+            }
+            .tint(.red)
+        }
+        .swipeActions(edge: .trailing) {
+            Button(action: toggleCompletion) {
+                Label(
+                    item.isCompleted ? "Mark Incomplete" : "Mark Complete",
+                    systemImage: item.isCompleted ? "arrow.uturn.backward" : "checkmark"
+                )
+            }
+            .tint(item.isCompleted ? .orange : .green)
         }
     }
     

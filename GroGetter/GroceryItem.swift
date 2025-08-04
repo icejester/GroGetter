@@ -10,11 +10,13 @@ import Foundation
 struct GroceryCategory: Identifiable, Codable, Hashable, Equatable {
     static let standardCategories: [GroceryCategory] = [
         GroceryCategory(name: "Produce"),
-        GroceryCategory(name: "Dairy"),
-        GroceryCategory(name: "Butcher"),
         GroceryCategory(name: "Bakery"),
+        GroceryCategory(name: "Deli"),
+        GroceryCategory(name: "Butcher"),
+        GroceryCategory(name: "Dairy"),
+        GroceryCategory(name: "Aisles"),
         GroceryCategory(name: "Frozen"),
-        GroceryCategory(name: "Deli")
+        
     ]
     
     static var allCases: [GroceryCategory] {

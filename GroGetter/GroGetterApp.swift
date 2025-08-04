@@ -15,11 +15,21 @@ struct GroGetterApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(store)
-                .preferredColorScheme(.light) // Force light mode for consistency
                 .onAppear {
                     // Set default appearance
                     UITableView.appearance().backgroundColor = .clear
-                    UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor.label]
+                    
+                    // Update navigation bar appearance to work with both light and dark mode
+                    let appearance = UINavigationBarAppearance()
+                    appearance.configureWithDefaultBackground()
+                    UINavigationBar.appearance().standardAppearance = appearance
+                    UINavigationBar.appearance().scrollEdgeAppearance = appearance
+                    UINavigationBar.appearance().compactAppearance = appearance
+                    
+                    // Set title color that works in both light and dark mode
+                    UINavigationBar.appearance().largeTitleTextAttributes = [
+                        .foregroundColor: UIColor.label
+                    ]
                 }
         }
     }
